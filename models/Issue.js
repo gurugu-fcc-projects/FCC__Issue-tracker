@@ -22,9 +22,11 @@ const issueSchema = new Schema(
     },
     assigned_to: {
       type: String,
+      default: "",
     },
     status_text: {
       type: String,
+      default: "",
     },
     open: {
       type: Boolean,
