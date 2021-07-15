@@ -12,13 +12,21 @@ module.exports = function (app) {
 
     .post(async (req, res) => {
       const project = req.params.project;
+
+      if (
+        !req.body.issue_title ||
+        !req.body.issue_text ||
+        !req.body.created_by
+      ) {
+        // return res.status(412).json({ error: "required field(s) missing" });
+        return res.json({ error: "required field(s) missing" });
+      }
+
       const data = { project, ...req.body };
 
       const newIssue = await Issue.create(data);
 
-      console.log(newIssue);
-
-      // res.status(201).json(newIssue)
+      res.status(201).json(newIssue);
     })
 
     .put(async (req, res) => {

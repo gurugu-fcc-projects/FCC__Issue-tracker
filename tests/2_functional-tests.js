@@ -28,6 +28,7 @@ suite("Functional Tests", () => {
         done();
       });
   });
+
   test("Create an issue with only required fields: POST request to /api/issues/{project}", done => {
     const issue = {
       issue_title: "Topchik Issue 1",
@@ -44,6 +45,26 @@ suite("Functional Tests", () => {
         assert.equal(res.type, "application/json");
         assert.isObject(res.body);
         assert.nestedInclude(res.body, issue);
+
+        done();
+      });
+  });
+
+  test("Create an issue with missing required fields: POST request to /api/issues/{project}", done => {
+    const issue = {
+      created_by: "Wunderwaffe",
+    };
+
+    chai
+      .request(server)
+      .post("/api/issues/123")
+      .send(issue)
+      .end((err, res) => {
+        assert.equal(res.status, 412);
+        assert.equal(res.type, "application/json");
+        assert.isObject(res.body);
+        assert.property(res.body, "error");
+        assert.equal(res.body.error, "required field(s) missing");
 
         done();
       });
