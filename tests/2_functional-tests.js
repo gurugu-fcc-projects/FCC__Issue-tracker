@@ -20,7 +20,7 @@ suite("Functional Tests", () => {
       .post("/api/issues/123")
       .send(issue)
       .end((err, res) => {
-        assert.equal(201);
+        assert.equal(res.status, 201);
         assert.equal(res.type, "application/json");
         assert.isObject(res.body);
         assert.nestedInclude(res.body, issue);
@@ -29,16 +29,18 @@ suite("Functional Tests", () => {
       });
   });
   test("Create an issue with only required fields: POST request to /api/issues/{project}", done => {
+    const issue = {
+      issue_title: "Topchik Issue 1",
+      issue_text: "There is an issue with Topchik",
+      created_by: "Topchik",
+    };
+
     chai
       .request(server)
       .post("/api/issues/123")
-      .send({
-        issue_title: "Topchik Issue 1",
-        issue_text: "There is an issue with Topchik",
-        created_by: "Topchik",
-      })
+      .send(issue)
       .end((err, res) => {
-        assert.equal(201);
+        assert.equal(res.status, 201);
         assert.equal(res.type, "application/json");
         assert.isObject(res.body);
         assert.nestedInclude(res.body, issue);
