@@ -76,28 +76,21 @@ suite("Functional Tests", () => {
 
   test("View issues on a project: GET request to /api/issues/{project}", done => {
     const requester = chai.request(server).keepOpen();
-    const issues = [
-      {
-        issue_title: "Get Issue 1",
-        issue_text: "Getting all issues",
-        created_by: "Durandal",
-      },
-      {
-        issue_title: "Get Issue 2",
-        issue_text: "Getting all issues",
-        created_by: "Durandal",
-      },
-      {
-        issue_title: "Get Issue 3",
-        issue_text: "Getting all issues",
-        created_by: "Durandal",
-      },
-    ];
+    const data = {
+      issue_text: "Getting all issues",
+      created_by: "Durandal",
+    };
 
     Promise.all([
-      requester.post("/api/issues/123").send(issues[0]),
-      requester.post("/api/issues/123").send(issues[1]),
-      requester.post("/api/issues/123").send(issues[2]),
+      requester
+        .post("/api/issues/123")
+        .send({ ...data, issue_title: "Get Issue 1" }),
+      requester
+        .post("/api/issues/123")
+        .send({ ...data, issue_title: "Get Issue 2" }),
+      requester
+        .post("/api/issues/123")
+        .send({ ...data, issue_title: "Get Issue 3" }),
     ])
       .then(responses => {
         const re = new RegExp("Get Issue \\d");
@@ -116,6 +109,75 @@ suite("Functional Tests", () => {
               assert.equal(issue.issue_text, "Getting all issues");
               assert.property(issue, "created_by");
               assert.equal(issue.created_by, "Durandal");
+            });
+
+            done();
+          });
+      })
+      .then(() => requester.close())
+      .catch(err => console.log(err));
+  });
+
+  test("View issues on a project with one filter: GET request to /api/issues/{project}", done => {
+    const requester = chai.request(server).keepOpen();
+    const data = {
+      issue_title: "Get With One Filter",
+      issue_text: "Getting issues with one filter",
+    };
+
+    Promise.all([
+      requester.post("/api/issues/123").send({ ...data, created_by: "Bob" }),
+      requester.post("/api/issues/123").send({ ...data, created_by: "Bob" }),
+      requester.post("/api/issues/123").send({ ...data, created_by: "Liz" }),
+    ])
+      .then(responses => {
+        chai
+          .request(server)
+          .get("/api/issues/123?created_by=Bob")
+          .end((err, res) => {
+            assert.isArray(res.body);
+            assert.lengthOf(res.body, 2);
+
+            res.body.forEach(issue => {
+              assert.equal(issue.created_by, "Bob");
+            });
+
+            done();
+          });
+      })
+      .then(() => requester.close())
+      .catch(err => console.log(err));
+  });
+
+  test("View issues on a project with multiple filters: GET request to /api/issues/{project}", done => {
+    const requester = chai.request(server).keepOpen();
+    const data = {
+      issue_title: "Get With One Filter",
+      issue_text: "Getting issues with one filter",
+    };
+
+    Promise.all([
+      requester
+        .post("/api/issues/123")
+        .send({ ...data, created_by: "Bob", assigned_to: "Liz" }),
+      requester
+        .post("/api/issues/123")
+        .send({ ...data, created_by: "Bob", assigned_to: "Bob" }),
+      requester
+        .post("/api/issues/123")
+        .send({ ...data, created_by: "Liz", assigned_to: "Liz" }),
+    ])
+      .then(responses => {
+        chai
+          .request(server)
+          .get("/api/issues/123?created_by=Bob&assigned_to=Liz")
+          .end((err, res) => {
+            assert.isArray(res.body);
+            assert.lengthOf(res.body, 1);
+
+            res.body.forEach(issue => {
+              assert.equal(issue.created_by, "Bob");
+              assert.equal(issue.assigned_to, "Liz");
             });
 
             done();

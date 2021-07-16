@@ -8,8 +8,9 @@ module.exports = function (app) {
 
     .get(async (req, res) => {
       const project = req.params.project;
+      const filters = { project, ...req.query };
 
-      const issues = await Issue.find({ project });
+      const issues = await Issue.find(filters);
 
       res.status(200).json(issues);
     })
