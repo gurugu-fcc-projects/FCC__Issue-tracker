@@ -36,6 +36,11 @@ module.exports = function (app) {
 
     .put(async (req, res) => {
       const project = req.params.project;
+      const { _id, ...newFields } = req.body;
+
+      await Issue.findByIdAndUpdate(_id, newFields);
+
+      res.status(201).json({ result: "successfully updated", _id });
     })
 
     .delete(async (req, res) => {
