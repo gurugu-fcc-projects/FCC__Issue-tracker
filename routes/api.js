@@ -8,6 +8,10 @@ module.exports = function (app) {
 
     .get(async (req, res) => {
       const project = req.params.project;
+
+      const issues = await Issue.find({ project });
+
+      res.status(200).json(issues);
     })
 
     .post(async (req, res) => {
