@@ -36,7 +36,16 @@ module.exports = function (app) {
 
     .put(async (req, res) => {
       const project = req.params.project;
+
+      if (!req.body._id) {
+        return res.status(400).json({ error: "missing _id" });
+      }
+
       const { _id, ...newFields } = req.body;
+
+      if (Object.keys(newFields).length < 1) {
+        return res.status(400).json({ error: "no update field(s) sent" });
+      }
 
       await Issue.findByIdAndUpdate(_id, newFields);
 

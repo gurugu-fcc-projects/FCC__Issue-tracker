@@ -274,4 +274,66 @@ suite("Functional Tests", () => {
           });
       });
   });
+
+  test("Update an issue with missing _id: PUT request to /api/issues/{project}", done => {
+    const data = {
+      issue_title: "Update Issue 3",
+      issue_text: "There is an update issue",
+      created_by: "Wunderwaffe",
+      assigned_to: "Milwakee",
+      status_text: "In progress",
+    };
+
+    chai
+      .request(server)
+      .post("/api/issues/123")
+      .send(data)
+      .end((err, res) => {
+        chai
+          .request(server)
+          .put("/api/issues/123")
+          .send({
+            issue_title: "Update Issue 3",
+            issue_text: "There is a multifield update issue",
+            status_text: "Resolved",
+          })
+          .end((err, res) => {
+            assert.isObject(res.body);
+            assert.equal(res.body.error, "missing _id");
+
+            done();
+          });
+      });
+  });
+
+  test("Update an issue with no fields to update: PUT request to /api/issues/{project}", done => {
+    const data = {
+      issue_title: "Update Issue 4",
+      issue_text: "There is an update issue",
+      created_by: "Wunderwaffe",
+      assigned_to: "Milwakee",
+      status_text: "In progress",
+    };
+
+    chai
+      .request(server)
+      .post("/api/issues/123")
+      .send(data)
+      .end((err, res) => {
+        const issueId = res.body._id;
+
+        chai
+          .request(server)
+          .put("/api/issues/123")
+          .send({
+            _id: issueId,
+          })
+          .end((err, res) => {
+            assert.isObject(res.body);
+            assert.equal(res.body.error, "no update field(s) sent");
+
+            done();
+          });
+      });
+  });
 });
