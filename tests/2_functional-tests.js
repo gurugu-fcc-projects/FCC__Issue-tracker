@@ -225,4 +225,53 @@ suite("Functional Tests", () => {
           });
       });
   });
+
+  test("Update multiple fields on an issue: PUT request to /api/issues/{project}", done => {
+    const data = {
+      issue_title: "Update Issue 2",
+      issue_text: "There is an update issue",
+      created_by: "Wunderwaffe",
+      assigned_to: "Milwakee",
+      status_text: "In progress",
+    };
+
+    chai
+      .request(server)
+      .post("/api/issues/123")
+      .send(data)
+      .end((err, res) => {
+        const issueId = res.body._id;
+
+        chai
+          .request(server)
+          .put("/api/issues/123")
+          .send({
+            _id: issueId,
+            issue_title: "Update Issue 2",
+            issue_text: "There is a multifield update issue",
+            status_text: "Resolved",
+          })
+          .end((err, res) => {
+            chai
+              .request(server)
+              .get(`/api/issues/123?_id=${issueId}`)
+              .end((err, res) => {
+                assert.isArray(res.body);
+                assert.isObject(res.body[0]);
+                assert.equal(res.body[0].issue_title, "Update Issue 2");
+                assert.equal(
+                  res.body[0].issue_text,
+                  "There is a multifield update issue"
+                );
+                assert.equal(res.body[0].status_text, "Resolved");
+                assert.isAbove(
+                  Date.parse(res.body[0].updated_on),
+                  Date.parse(res.body[0].created_on)
+                );
+
+                done();
+              });
+          });
+      });
+  });
 });
