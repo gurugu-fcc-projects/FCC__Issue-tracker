@@ -10,7 +10,7 @@ chai.use(chaiHttp);
 suite("Functional Tests", () => {
   setup(async () => await Issue.deleteMany({ project: "123" }));
 
-  test("Create an issue with every field: POST request to /api/issues/{project}", done => {
+  test.skip("Create an issue with every field: POST request to /api/issues/{project}", done => {
     const data = {
       issue_title: "Issue 1",
       issue_text: "There is an issue",
@@ -33,7 +33,7 @@ suite("Functional Tests", () => {
       });
   });
 
-  test("Create an issue with only required fields: POST request to /api/issues/{project}", done => {
+  test.skip("Create an issue with only required fields: POST request to /api/issues/{project}", done => {
     const data = {
       issue_title: "Topchik Issue 1",
       issue_text: "There is an issue with Topchik",
@@ -54,7 +54,7 @@ suite("Functional Tests", () => {
       });
   });
 
-  test("Create an issue with missing required fields: POST request to /api/issues/{project}", done => {
+  test.skip("Create an issue with missing required fields: POST request to /api/issues/{project}", done => {
     const data = {
       created_by: "Wunderwaffe",
     };
@@ -74,7 +74,7 @@ suite("Functional Tests", () => {
       });
   });
 
-  test("View issues on a project: GET request to /api/issues/{project}", done => {
+  test.skip("View issues on a project: GET request to /api/issues/{project}", done => {
     const requester = chai.request(server).keepOpen();
     const data = {
       issue_text: "Getting all issues",
@@ -118,7 +118,7 @@ suite("Functional Tests", () => {
       .catch(err => console.log(err));
   });
 
-  test("View issues on a project with one filter: GET request to /api/issues/{project}", done => {
+  test.skip("View issues on a project with one filter: GET request to /api/issues/{project}", done => {
     const requester = chai.request(server).keepOpen();
     const data = {
       issue_title: "Get With One Filter",
@@ -149,7 +149,7 @@ suite("Functional Tests", () => {
       .catch(err => console.log(err));
   });
 
-  test("View issues on a project with multiple filters: GET request to /api/issues/{project}", done => {
+  test.skip("View issues on a project with multiple filters: GET request to /api/issues/{project}", done => {
     const requester = chai.request(server).keepOpen();
     const data = {
       issue_title: "Get With One Filter",
@@ -187,7 +187,7 @@ suite("Functional Tests", () => {
       .catch(err => console.log(err));
   });
 
-  test("Update one field on an issue: PUT request to /api/issues/{project}", done => {
+  test.skip("Update one field on an issue: PUT request to /api/issues/{project}", done => {
     const data = {
       issue_title: "Update Issue 1",
       issue_text: "There is an update issue",
@@ -226,7 +226,7 @@ suite("Functional Tests", () => {
       });
   });
 
-  test("Update multiple fields on an issue: PUT request to /api/issues/{project}", done => {
+  test.skip("Update multiple fields on an issue: PUT request to /api/issues/{project}", done => {
     const data = {
       issue_title: "Update Issue 2",
       issue_text: "There is an update issue",
@@ -275,7 +275,7 @@ suite("Functional Tests", () => {
       });
   });
 
-  test("Update an issue with missing _id: PUT request to /api/issues/{project}", done => {
+  test.skip("Update an issue with missing _id: PUT request to /api/issues/{project}", done => {
     const data = {
       issue_title: "Update Issue 3",
       issue_text: "There is an update issue",
@@ -306,7 +306,7 @@ suite("Functional Tests", () => {
       });
   });
 
-  test("Update an issue with no fields to update: PUT request to /api/issues/{project}", done => {
+  test.skip("Update an issue with no fields to update: PUT request to /api/issues/{project}", done => {
     const data = {
       issue_title: "Update Issue 4",
       issue_text: "There is an update issue",
@@ -334,6 +334,26 @@ suite("Functional Tests", () => {
 
             done();
           });
+      });
+  });
+
+  test("Update an issue with an invalid _id: PUT request to /api/issues/{project}", done => {
+    const badId = "5f665eb4cccccc6b9b6a504d";
+
+    chai
+      .request(server)
+      .put("/api/issues/123")
+      .send({
+        _id: badId,
+      })
+      .end((err, res) => {
+        assert.isObject(res.body);
+        assert.deepEqual(res.body, {
+          error: "no update field(s) sent",
+          _id: badId,
+        });
+
+        done();
       });
   });
 });
