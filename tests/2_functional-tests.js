@@ -337,7 +337,7 @@ suite("Functional Tests", () => {
       });
   });
 
-  test("Update an issue with an invalid _id: PUT request to /api/issues/{project}", done => {
+  test.skip("Update an issue with an invalid _id: PUT request to /api/issues/{project}", done => {
     const badId = "5f665eb4cccccc6b9b6a504d";
 
     chai
@@ -352,6 +352,72 @@ suite("Functional Tests", () => {
           error: "no update field(s) sent",
           _id: badId,
         });
+
+        done();
+      });
+  });
+
+  test("Delete an issue: DELETE request to /api/issues/{project}", done => {
+    const data = {
+      issue_title: "Delete Issue 1",
+      issue_text: "There is a delete issue",
+      created_by: "Wunderwaffe",
+      assigned_to: "Milwakee",
+      status_text: "Resolved",
+    };
+
+    chai
+      .request(server)
+      .post("/api/issues/123")
+      .send(data)
+      .end((err, res) => {
+        const issueId = res.body._id;
+
+        chai
+          .request(server)
+          .delete("/api/issues/123")
+          .send({
+            _id: issueId,
+          })
+          .end((err, res) => {
+            assert.isObject(res.body);
+            assert.deepEqual(res.body, {
+              result: "successfully deleted",
+              _id: issueId,
+            });
+
+            done();
+          });
+      });
+  });
+
+  test("Delete an issue with an invalid _id: DELETE request to /api/issues/{project}", done => {
+    const badId = "5f665eb4cccccc6b9b6a504d";
+
+    chai
+      .request(server)
+      .delete("/api/issues/123")
+      .send({
+        _id: badId,
+      })
+      .end((err, res) => {
+        assert.isObject(res.body);
+        assert.deepEqual(res.body, {
+          error: "could not delete",
+          _id: badId,
+        });
+
+        done();
+      });
+  });
+
+  test("Delete an issue with missing _id: DELETE request to /api/issues/{project}", done => {
+    chai
+      .request(server)
+      .delete("/api/issues/123")
+      .end((err, res) => {
+        assert.isObject(res.body);
+        assert.equal(res.body.error, "missing _id");
 
         done();
       });
