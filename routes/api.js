@@ -38,18 +38,30 @@ module.exports = function (app) {
       const project = req.params.project;
 
       if (!req.body._id) {
-        return res.status(400).json({ error: "missing _id" });
+        // return res.status(400).json({ error: "missing _id" });
+        return res.json({ error: "missing _id" });
       }
 
       const { _id, ...newFields } = req.body;
 
       if (Object.keys(newFields).length < 1) {
-        return res.status(400).json({ error: "no update field(s) sent" });
+        // return res.status(400).json({ error: "no update field(s) sent" });
+        return res.json({ error: "no update field(s) sent", _id });
       }
 
-      await Issue.findByIdAndUpdate(_id, newFields);
+      try {
+        const issue = await Issue.findById(_id);
 
-      res.status(201).json({ result: "successfully updated", _id });
+        if (!issue) {
+          return res.json({ error: "could not update", _id });
+        }
+
+        await Issue.findByIdAndUpdate(_id, newFields);
+
+        return res.status(201).json({ result: "successfully updated", _id });
+      } catch (err) {
+        return res.json({ error: "could not update", _id });
+      }
     })
 
     .delete(async (req, res) => {
