@@ -35,8 +35,6 @@ module.exports = function (app) {
     })
 
     .put(async (req, res) => {
-      const project = req.params.project;
-
       if (!req.body._id) {
         // return res.status(400).json({ error: "missing _id" });
         return res.json({ error: "missing _id" });
@@ -65,6 +63,25 @@ module.exports = function (app) {
     })
 
     .delete(async (req, res) => {
-      const project = req.params.project;
+      if (!req.body._id) {
+        // return res.status(400).json({ error: "missing _id" });
+        return res.json({ error: "missing _id" });
+      }
+
+      const { _id } = req.body;
+
+      try {
+        const issue = await Issue.findById(_id);
+
+        if (!issue) {
+          return res.json({ error: "could not delete", _id });
+        }
+
+        await Issue.findByIdAndDelete(_id);
+
+        return res.json({ result: "successfully deleted", _id });
+      } catch (err) {
+        return res.json({ error: "could not delete", _id });
+      }
     });
 };
